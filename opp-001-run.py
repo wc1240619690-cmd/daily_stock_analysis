@@ -60,19 +60,29 @@ def main():
     logger.info("飞书 Webhook URL 已从环境变量加载")
 
     # ---- Step 2: 导入数据采集与推送模块 ----
+    def _import_module(module_name: str, filename: str):
+        """通过文件路径加载模块（兼容含连字符/下划线的命名）。"""
+        import importlib.util
+        filepath = os.path.join(ROOT_DIR, filename)
+        if not os.path.exists(filepath):
+            logger.error("找不到模块文件: %s", filepath)
+            raise FileNotFoundError(f"模块文件不存在: {filepath}")
+        spec = importlib.util.spec_from_file_location(module_name, filepath)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
     try:
         from opp_001_data_fetcher import PureDataFetcher
+    except ImportError:
+        opp001_data_fetcher = _import_module("opp001_data_fetcher", "opp_001_data_fetcher.py")
+        PureDataFetcher = opp001_data_fetcher.PureDataFetcher
+
+    try:
         from opp_001_push import FeishuPusher
     except ImportError:
-        # opp-001-push.py 文件名含连字符，无法直接 import，需手动加载
-        import importlib.util
-        push_path = os.path.join(ROOT_DIR, "opp-001-push.py")
-        spec = importlib.util.spec_from_file_location("opp001_push", push_path)
-        opp001_push = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(opp001_push)
+        opp001_push = _import_module("opp001_push", "opp-001-push.py")
         FeishuPusher = opp001_push.FeishuPusher
-
-        from opp_001_data_fetcher import PureDataFetcher
 
     # ---- Step 3: 拉取客观市场数据（无 AI 分析） ----
     logger.info("正在拉取 A 股市场客观数据...")
