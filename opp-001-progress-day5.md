@@ -103,3 +103,35 @@ GitHub Actions (每个交易日 15:30)
 
 > 🚀 上线命令：`python opp-001-run.py`
 > 📅 下周继续：Week 2 功能扩展
+
+---
+
+## Day 5 补丁（2026-06-12）— 静默失败排查与修复
+
+### 故障现象
+GitHub Actions workflow_dispatch 显示绿勾，但飞书手机端未收到消息。
+
+### 排查过程
+1. 审查 `opp-001-run.py` 环境变量读取逻辑 → 无漏洞 ✅
+2. 本地 `--test-feishu` 连通性测试 → 飞书返回 code=0 ✅
+3. 本地模拟完整 GitHub Actions 流程 → **ModuleNotFoundError: opp_001_data_fetcher** ❌
+
+### 根因
+`opp_001_data_fetcher.py` 被遗漏在根目录，未搬入 Git 仓库 `opp-001-daily-stock/`。
+脚本在 import 阶段就崩溃退出，飞书推送从未被执行到。
+
+### 修复
+| # | 修复 | 文件 |
+|---|---|---|
+| 1 | 搬运遗漏文件 | `opp_001_data_fetcher.py` → `opp-001-daily-stock/` |
+| 2 | 加固导入容错 | `opp-001-run.py`：两个模块各自独立 try/except + importlib 兜底 |
+
+### 提交记录
+```
+71d3888 fix: 补全 opp_001_data_fetcher.py + 加固模块导入容错
+```
+
+### 状态
+- [x] 本地模拟完整流程通过
+- [x] 代码已推送到 `wc1240619690-cmd/daily_stock_analysis`
+- [ ] **待验证**：GitHub Actions 上重新触发 workflow_dispatch，确认飞书收到消息
