@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>推广素材截图工具 — 盯盘数据助手</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #e5e7eb; padding: 30px 20px; }
+h2 { text-align: center; margin-bottom: 10px; font-size: 1.2rem; color: #374151; }
+.instructions { text-align: center; color: #6b7280; font-size: .85rem; margin-bottom: 32px; }
+.frame-wrapper { max-width: 720px; margin: 0 auto 40px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.frame-label { font-size: .78rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+.frame-box { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+
+/* Frame 1: 微信群分享卡 */
+.wechat-card { max-width: 400px; margin: 0 auto; padding: 20px; background: #f9fafb; }
+.wechat-card .wc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.wechat-card .wc-avatar { width: 44px; height: 44px; border-radius: 6px; background: linear-gradient(135deg, #059669, #10b981); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.wechat-card .wc-name { font-weight: 700; font-size: .95rem; color: #1f2937; }
+.wechat-card .wc-time { font-size: .72rem; color: #9ca3af; }
+.wechat-card .wc-body { background: white; border-radius: 10px; padding: 16px; font-size: .88rem; line-height: 1.7; border: 1px solid #e5e7eb; }
+.wechat-card .wc-body .highlight { color: #059669; font-weight: 700; }
+.wechat-card .wc-link { color: #3b82f6; word-break: break-all; font-size: .82rem; }
+
+/* Frame 2: 飞书消息卡 */
+.feishu-card { max-width: 480px; margin: 0 auto; background: #f5f6f8; border-radius: 12px; overflow: hidden; }
+.feishu-card .fs-header { background: #fff; padding: 10px 16px; font-size: .8rem; font-weight: 600; color: #646a73; border-bottom: 1px solid #e5e6e8; display: flex; align-items: center; gap: 8px; }
+.feishu-card .fs-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+.feishu-card .fs-body { padding: 18px 16px; font-size: .88rem; line-height: 1.8; color: #1f2937; background: white; }
+.feishu-card .fs-body .up { color: #dc2626; font-weight: 700; }
+.feishu-card .fs-body .down { color: #059669; font-weight: 700; }
+.feishu-card .fs-warning { background: #fef2f2; margin: 0 12px 14px; padding: 10px 14px; border-radius: 8px; font-size: .78rem; color: #dc2626; font-weight: 600; }
+
+/* Frame 3: 闲鱼商品卡 */
+.xianyu-card { max-width: 360px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; }
+.xianyu-card .xy-img { height: 200px; background: linear-gradient(135deg, #ecfdf5, #d1fae5); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+.xianyu-card .xy-body { padding: 14px; }
+.xianyu-card .xy-price { font-size: 1.4rem; font-weight: 800; color: #ff5c00; }
+.xianyu-card .xy-price span { font-size: .8rem; color: #999; }
+.xianyu-card .xy-title { font-size: .95rem; font-weight: 700; margin: 6px 0; color: #1f2937; }
+.xianyu-card .xy-meta { font-size: .75rem; color: #999; display: flex; gap: 16px; }
+
+/* Frame 4: 对比表 */
+.comp-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.comp-table th { padding: 10px 14px; border-bottom: 2px solid #d1d5db; }
+.comp-table td { padding: 10px 14px; border-bottom: 1px solid #f3f4f6; }
+</style>
+</head>
+<body>
+
+<div class="instructions">
+  🖼️ 推广素材截图工具 — 每张卡可独立截图，用于微信群/雪球/闲鱼推广
+</div>
+
+<!-- Frame 1: 微信群分享卡 -->
+<div class="frame-wrapper">
+  <div class="frame-label">📱 Frame 1 — 微信群/朋友圈分享卡（模拟聊天消息）</div>
+  <div class="frame-box">
+    <div class="wechat-card">
+      <div class="wc-header">
+        <div class="wc-avatar">📊</div>
+        <div>
+          <div class="wc-name">盯盘数据助手</div>
+          <div class="wc-time">今天 15:32</div>
+        </div>
+      </div>
+      <div class="wc-body">
+        <p style="margin-bottom:8px;">📊 A股收盘数据速览 | 6月12日</p>
+        <p style="font-size:.82rem; color:#6b7280;">
+          <strong>上证指数</strong> 3,245.16 <span class="highlight">+0.87%</span><br>
+          <strong>深证成指</strong> 10,876.32 <span style="color:#059669;font-weight:700;">-0.23%</span><br>
+          <strong>创业板指</strong> 2,156.78 <span class="highlight">+1.15%</span><br><br>
+          <strong>两市成交额</strong> 8,762 亿（较昨日 +12.3%）<br><br>
+          <strong>板块资金流入 TOP3</strong><br>
+          半导体 +28.5亿 | 新能源 +16.2亿 | 医药 +11.8亿
+        </p>
+        <p style="font-size:.72rem; color:#9ca3af; margin-top:10px; padding-top:8px; border-top:1px solid #f3f4f6;">
+          ⚠️ 以上数据仅供参考，不构成投资建议。投资有风险，入市需谨慎。
+        </p>
+      </div>
+      <p style="font-size:.78rem; color:#9ca3af; margin-top:8px; text-align:center;">
+        每天收盘自动推送，免费试用 👇
+      </p>
+      <p class="wc-link" style="text-align:center;">
+        https://wc1240619690-cmd.github.io/daily_stock_analysis
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Frame 2: 飞书消息卡 -->
+<div class="frame-wrapper">
+  <div class="frame-label">📱 Frame 2 — 飞书群 Bot 消息预览（用于展示产品形态）</div>
+  <div class="frame-box">
+    <div class="feishu-card">
+      <div class="fs-header">
+        <div class="fs-dot"></div> 📊 盯盘数据助手 · Bot — 15:30
+      </div>
+      <div class="fs-body">
+        <strong>📊 A股收盘数据速览 | 2026-06-12 15:30</strong><br><br>
+        <strong>上证指数</strong> 3,245.16 <span class="up">+0.87%</span><br>
+        <strong>深证成指</strong> 10,876.32 <span class="down">-0.23%</span><br>
+        <strong>创业板指</strong> 2,156.78 <span class="up">+1.15%</span><br>
+        <strong>科创50</strong> 1,056.32 <span class="up">+0.52%</span><br><br>
+        <strong>两市成交额</strong> 8,762 亿（较昨日 +12.3%）<br>
+        <strong>上涨家数</strong> 3,922 | <strong>下跌家数</strong> 1,515<br><br>
+        <strong>🏭 板块资金流入 TOP3</strong><br>
+        🥇 半导体 +28.5 亿<br>
+        🥈 新能源 +16.2 亿<br>
+        🥉 医药 +11.8 亿<br><br>
+        <strong>📉 板块资金流出 TOP3</strong><br>
+        房地产 -8.3 亿 | 银行 -6.1 亿 | 钢铁 -3.2 亿
+      </div>
+      <div class="fs-warning">
+        ⚠️ 以上数据仅供参考，不构成投资建议。投资有风险，入市需谨慎。<br>
+        数据来源：AkShare / 东方财富
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Frame 3: 闲鱼商品卡 -->
+<div class="frame-wrapper">
+  <div class="frame-label">🛒 Frame 3 — 闲鱼商品卡片</div>
+  <div class="frame-box">
+    <div class="xianyu-card">
+      <div class="xy-img">📊</div>
+      <div class="xy-body">
+        <div class="xy-price">¥9.9 <span>（测试价）</span></div>
+        <div class="xy-title">飞书/微信 A股盯盘数据监控 — 自动推送省时省力</div>
+        <p style="font-size:.82rem; color:#6b7280; margin:4px 0 10px;">
+          每个交易日收盘自动推送大盘数据到飞书/微信。<br>
+          ✅ 纯数据推送 ✅ 不荐股不分析 ✅ 合规透明
+        </p>
+        <div class="xy-meta">
+          <span>👀 67 浏览</span><span>❤️ 5 想要</span><span>📍 线上服务</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Frame 4: 产品对比表 -->
+<div class="frame-wrapper">
+  <div class="frame-label">📊 Frame 4 — 产品对比表（雪球/知乎配图）</div>
+  <div class="frame-box" style="padding:20px; background:white;">
+    <table class="comp-table">
+      <thead>
+        <tr style="background:#f0fdf4;">
+          <th style="text-align:left; border-bottom:2px solid #059669;">对比维度</th>
+          <th style="text-align:center; border-bottom:2px solid #059669; color:#059669;">📊 盯盘数据助手</th>
+          <th style="text-align:center;">📱 手动刷行情App</th>
+          <th style="text-align:center;">💸 付费投顾服务</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:600;">日均耗时</td>
+          <td style="text-align:center; color:#059669; font-weight:700;">1 分钟</td>
+          <td style="text-align:center;">2+ 小时</td>
+          <td style="text-align:center;">30 分钟</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">年费</td>
+          <td style="text-align:center; color:#059669; font-weight:700;">¥168/年</td>
+          <td style="text-align:center;">免费</td>
+          <td style="text-align:center;">¥2,000-20,000+</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">AI 荐股</td>
+          <td style="text-align:center; color:#dc2626;">❌ 不提供</td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;">⚠️ 多数无牌照</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">合规风险</td>
+          <td style="text-align:center; color:#059669; font-weight:700;">无（纯数据）</td>
+          <td style="text-align:center;">无</td>
+          <td style="text-align:center; color:#dc2626;">高</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">推送渠道</td>
+          <td style="text-align:center; color:#059669; font-weight:700;">飞书 + 微信</td>
+          <td style="text-align:center;">需手动打开</td>
+          <td style="text-align:center;">微信/短信</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:.7rem; color:#9ca3af; text-align:center; margin-top:12px;">
+      数据来源：AkShare/东方财富 | 本产品为纯数据工具，非投资顾问
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
