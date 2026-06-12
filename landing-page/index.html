@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A股盯盘数据助手 — 省下每天2小时盯盘时间</title>
+<meta name="description" content="纯客观市场数据推送，不荐股、不分析、不预测。飞书/微信定时接收 A 股大盘指数、成交量、板块资金流向。">
+<style>
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #059669;
+  --green-light: #10b981;
+  --green-dark: #047857;
+  --green-bg: #ecfdf5;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --white: #ffffff;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.05);
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  color: var(--gray-800);
+  background: var(--white);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--green); text-decoration: none; }
+a:hover { color: var(--green-dark); }
+
+img { max-width: 100%; height: auto; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+/* ============================================================
+   Nav
+   ============================================================ */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 14px 0;
+}
+.nav .container { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { font-size: 1.15rem; font-weight: 700; color: var(--gray-900); }
+.nav-logo span { color: var(--green); }
+.nav-cta {
+  background: var(--green); color: var(--white); border: none;
+  padding: 8px 20px; border-radius: 20px; font-size: .875rem;
+  font-weight: 600; cursor: pointer; transition: background .2s;
+}
+.nav-cta:hover { background: var(--green-dark); }
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero {
+  padding: 72px 0 56px; text-align: center;
+  background: linear-gradient(180deg, var(--green-bg) 0%, var(--white) 100%);
+}
+.hero-badge {
+  display: inline-block; background: var(--green-bg); color: var(--green-dark);
+  border: 1px solid #a7f3d0; padding: 6px 16px; border-radius: 20px;
+  font-size: .85rem; font-weight: 600; margin-bottom: 24px;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 800;
+  color: var(--gray-900); line-height: 1.3; margin-bottom: 16px;
+}
+.hero h1 span { color: var(--green); }
+.hero-sub {
+  font-size: 1.1rem; color: var(--gray-500); max-width: 520px;
+  margin: 0 auto 32px; line-height: 1.6;
+}
+.hero-cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--green); color: var(--white); border: none;
+  padding: 14px 36px; border-radius: 28px; font-size: 1rem;
+  font-weight: 700; cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 14px rgba(5,150,105,.35);
+}
+.btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+.btn-outline {
+  background: var(--white); color: var(--green); border: 2px solid var(--green);
+  padding: 14px 36px; border-radius: 28px; font-size: 1rem;
+  font-weight: 700; cursor: pointer; transition: all .2s;
+}
+.btn-outline:hover { background: var(--green-bg); }
+
+.hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 48px; flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat-num { font-size: 1.6rem; font-weight: 800; color: var(--gray-900); }
+.hero-stat-label { font-size: .85rem; color: var(--gray-400); margin-top: 4px; }
+
+/* ============================================================
+   Sections
+   ============================================================ */
+.section { padding: 72px 0; }
+.section-gray { background: var(--gray-50); }
+.section-label {
+  text-align: center; font-size: .8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--green); margin-bottom: 12px;
+}
+.section-title {
+  text-align: center; font-size: clamp(1.4rem, 3.5vw, 2rem); font-weight: 800;
+  color: var(--gray-900); margin-bottom: 16px;
+}
+.section-sub {
+  text-align: center; font-size: 1rem; color: var(--gray-500);
+  max-width: 560px; margin: 0 auto 48px;
+}
+
+/* ============================================================
+   Pain Point
+   ============================================================ */
+.pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+.pain-card {
+  background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius);
+  padding: 28px; box-shadow: var(--shadow);
+}
+.pain-icon { font-size: 1.8rem; margin-bottom: 12px; }
+.pain-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: var(--gray-900); }
+.pain-card p { font-size: .92rem; color: var(--gray-500); line-height: 1.6; }
+
+/* ============================================================
+   Features / Data Preview
+   ============================================================ */
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.feature-item {
+  background: var(--white); border: 1px solid var(--gray-200);
+  border-radius: var(--radius); padding: 24px; text-align: center;
+}
+.feature-icon { font-size: 2rem; margin-bottom: 8px; }
+.feature-item h4 { font-size: .95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.feature-item p { font-size: .82rem; color: var(--gray-400); }
+
+/* Message Preview Card */
+.preview-card {
+  max-width: 420px; margin: 40px auto 0; background: var(--white);
+  border: 1px solid var(--gray-200); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.preview-header {
+  background: var(--gray-50); padding: 12px 16px; font-size: .8rem;
+  font-weight: 600; color: var(--gray-500); border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; gap: 8px;
+}
+.preview-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.preview-body { padding: 20px 16px; font-size: .88rem; line-height: 1.7; }
+.preview-body strong { color: var(--gray-900); }
+.preview-body .up { color: var(--red); font-weight: 700; }
+.preview-body .down { color: var(--green); font-weight: 700; }
+.preview-footer {
+  background: var(--red-bg); margin: 0 12px 12px; padding: 10px 14px;
+  border-radius: 8px; font-size: .78rem; color: var(--red);
+  font-weight: 600; text-align: center;
+}
+
+/* ============================================================
+   How It Works
+   ============================================================ */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 28px; }
+.step {
+  text-align: center; position: relative;
+  background: var(--white); border: 1px solid var(--gray-200);
+  border-radius: var(--radius); padding: 32px 24px; box-shadow: var(--shadow);
+}
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%; background: var(--green);
+  color: var(--white); font-size: 1.2rem; font-weight: 800; margin-bottom: 16px;
+}
+.step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--gray-900); }
+.step p { font-size: .88rem; color: var(--gray-500); line-height: 1.6; }
+
+/* ============================================================
+   Who is this for / NOT for
+   ============================================================ */
+.audience-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 600px) { .audience-grid { grid-template-columns: 1fr; } }
+.audience-for {
+  background: var(--green-bg); border: 1px solid #a7f3d0;
+  border-radius: var(--radius); padding: 28px;
+}
+.audience-not {
+  background: var(--red-bg); border: 1px solid #fecaca;
+  border-radius: var(--radius); padding: 28px;
+}
+.audience-for h3 { color: var(--green-dark); font-size: 1rem; margin-bottom: 12px; }
+.audience-not h3 { color: var(--red); font-size: 1rem; margin-bottom: 12px; }
+.audience-for ul, .audience-not ul { list-style: none; padding: 0; }
+.audience-for li, .audience-not li {
+  font-size: .92rem; padding: 4px 0; color: var(--gray-700);
+}
+.audience-for li::before { content: "✅ "; }
+.audience-not li::before { content: "❌ "; }
+
+/* ============================================================
+   Pricing
+   ============================================================ */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 740px; margin: 0 auto; }
+.pricing-card {
+  background: var(--white); border: 2px solid var(--gray-200);
+  border-radius: var(--radius); padding: 32px 24px; text-align: center;
+  box-shadow: var(--shadow);
+}
+.pricing-card.featured { border-color: var(--green); box-shadow: var(--shadow-lg); position: relative; }
+.pricing-card.featured::before {
+  content: "推荐"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--green); color: white; padding: 4px 18px; border-radius: 12px;
+  font-size: .78rem; font-weight: 700;
+}
+.pricing-name { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+.pricing-price { font-size: 2.2rem; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+.pricing-price span { font-size: .9rem; font-weight: 500; color: var(--gray-400); }
+.pricing-desc { font-size: .85rem; color: var(--gray-500); margin-bottom: 20px; }
+.pricing-features { list-style: none; padding: 0; margin-bottom: 24px; text-align: left; }
+.pricing-features li { font-size: .88rem; padding: 6px 0; color: var(--gray-600); }
+.pricing-features li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+
+/* ============================================================
+   Compliance Banner
+   ============================================================ */
+.compliance-banner {
+  background: #fffbeb; border: 2px solid #fcd34d;
+  border-radius: var(--radius); padding: 24px 28px; max-width: 740px; margin: 0 auto;
+}
+.compliance-banner h3 { color: #92400e; font-size: 1rem; margin-bottom: 10px; }
+.compliance-banner ul { list-style: none; padding: 0; }
+.compliance-banner li {
+  font-size: .88rem; color: #78350f; padding: 3px 0; line-height: 1.6;
+}
+.compliance-banner li::before { content: "⚠️ "; }
+
+/* ============================================================
+   Signup Form
+   ============================================================ */
+.signup-card {
+  max-width: 480px; margin: 0 auto; background: var(--white);
+  border: 1px solid var(--gray-200); border-radius: var(--radius);
+  padding: 36px 28px; box-shadow: var(--shadow-lg);
+}
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: .88rem; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+.form-group input, .form-group select {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--gray-300);
+  border-radius: 8px; font-size: .95rem; font-family: inherit;
+  transition: border-color .2s;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(5,150,105,.12);
+}
+.form-submit {
+  width: 100%; padding: 14px; background: var(--green); color: var(--white);
+  border: none; border-radius: 8px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: all .2s; margin-top: 8px;
+}
+.form-submit:hover { background: var(--green-dark); }
+.form-note { text-align: center; font-size: .78rem; color: var(--gray-400); margin-top: 12px; }
+.form-success {
+  display: none; text-align: center; padding: 24px;
+  background: var(--green-bg); border-radius: var(--radius); margin-top: 16px;
+}
+.form-success h4 { color: var(--green-dark); margin-bottom: 8px; }
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer {
+  background: var(--gray-900); color: var(--gray-400); padding: 40px 0;
+  text-align: center; font-size: .85rem; line-height: 1.8;
+}
+.footer a { color: var(--gray-300); }
+.footer a:hover { color: var(--white); }
+.footer-strong { color: var(--gray-200); font-weight: 600; }
+
+/* ============================================================
+   Mobile
+   ============================================================ */
+@media (max-width: 640px) {
+  .hero { padding: 48px 0 40px; }
+  .section { padding: 48px 0; }
+  .hero-stats { gap: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Nav
+     ============================================================ -->
+<nav class="nav">
+  <div class="container">
+    <div class="nav-logo">📊 盯盘<span>数据助手</span></div>
+    <a href="#signup" class="nav-cta">免费试用</a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     Hero
+     ============================================================ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">🟢 纯数据工具 · 非投资顾问</div>
+    <h1>省下每天<span>2小时</span>盯盘时间<br>让数据自动来找你</h1>
+    <p class="hero-sub">
+      每个交易日收盘后，A股大盘指数、成交量、板块资金流向自动推送到你的飞书或微信——不荐股，不分析，只给你客观数据。
+    </p>
+    <div class="hero-cta-group">
+      <a href="#signup" class="btn-primary">👉 免费试用 7 天</a>
+      <a href="#how-it-works" class="btn-outline">了解详情</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">2.4 亿</div>
+        <div class="hero-stat-label">A 股散户总数</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">2h+</div>
+        <div class="hero-stat-label">散户日均盯盘时间</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">81%</div>
+        <div class="hero-stat-label">散户亏损比例</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Pain Points
+     ============================================================ -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">你是不是也有这些困扰？</div>
+    <h2 class="section-title">盯盘，是散户最累的事</h2>
+    <p class="section-sub">信息过载、软件太多、看不过来——但你需要的其实只是一个简洁的数据汇总。</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">😰</div>
+        <h3>每天花 2 小时刷行情</h3>
+        <p>打开五六个 App，翻来翻去，真正有用的信息就那几条——收盘后的客观数据。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">📱</div>
+        <h3>自选股太多看不过来</h3>
+        <p>关注了几十只股票，每只都想盯，但你真正需要的是大盘和板块的整体走势，不是一只只去翻。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🤯</div>
+        <h3>被各种"老师"和推票轰炸</h3>
+        <p>股票群里充斥着"内幕消息"和荐股广告，你只是想看真实的数据，不想被人牵着走。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Features
+     ============================================================ -->
+<section class="section section-gray">
+  <div class="container">
+    <div class="section-label">推送内容</div>
+    <h2 class="section-title">每天 1 条消息，包含这些客观数据</h2>
+    <p class="section-sub">收盘后自动推送，不包含任何 AI 预测、评分或买卖建议。</p>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <div class="feature-icon">📈</div>
+        <h4>大盘指数</h4>
+        <p>上证、深证、创业板收盘价 & 涨跌幅</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📊</div>
+        <h4>成交量统计</h4>
+        <p>两市成交额 & 较前日变化</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🏭</div>
+        <h4>板块资金流向</h4>
+        <p>行业板块主力资金净流入/流出</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📅</div>
+        <h4>今日财经日历</h4>
+        <p>重要财报/经济数据发布日期提醒</p>
+      </div>
+    </div>
+
+    <!-- Preview Card -->
+    <div class="preview-card">
+      <div class="preview-header">
+        <div class="preview-dot"></div> 飞书群消息预览 — 2026-06-12 15:35
+      </div>
+      <div class="preview-body">
+        <strong>📊 A股收盘数据速览 | 2026-06-12</strong><br><br>
+        <strong>上证指数</strong> 3,245.16 <span class="up">+0.87%</span><br>
+        <strong>深证成指</strong> 10,876.32 <span class="down">-0.23%</span><br>
+        <strong>创业板指</strong> 2,156.78 <span class="up">+1.15%</span><br><br>
+        <strong>两市成交额</strong> 8,762 亿（较昨日 +12.3%）<br><br>
+        <strong>🏭 板块资金流入 TOP3</strong><br>
+        1. 半导体 +28.5 亿<br>
+        2. 新能源 +16.2 亿<br>
+        3. 医药 +11.8 亿
+      </div>
+      <div class="preview-footer">
+        ⚠️ 以上数据仅供参考，不构成投资建议<br>投资有风险，入市需谨慎
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     How It Works
+     ============================================================ -->
+<section class="section" id="how-it-works">
+  <div class="container">
+    <div class="section-label">三步开始</div>
+    <h2 class="section-title">从注册到接收推送，3 分钟搞定</h2>
+    <p class="section-sub"></p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>填写联系方式</h3>
+        <p>在下方表单留下手机号或微信号，我们会通过微信联系你确认。</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>加入飞书/微信群</h3>
+        <p>我们会把你拉入推送群，或帮你配置飞书机器人个人推送。</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>收盘后自动接收</h3>
+        <p>每个交易日 15:30，一条简洁的数据汇总消息自动送达。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Who is this for
+     ============================================================ -->
+<section class="section section-gray">
+  <div class="container">
+    <div class="section-label">适用人群</div>
+    <h2 class="section-title">这个工具适合你吗？</h2>
+    <p class="section-sub">诚实地说——它不是万能神器，只是一个帮你省时间的数据工具。</p>
+    <div class="audience-grid">
+      <div class="audience-for">
+        <h3>✅ 适合你，如果你……</h3>
+        <ul>
+          <li>每天花大量时间手动刷行情 App</li>
+          <li>想知道大盘和板块整体走势，不需要个股推荐</li>
+          <li>需要一块简洁的"仪表盘"，不是冗长的分析报告</li>
+          <li>理解这是数据工具，不是投资顾问</li>
+        </ul>
+      </div>
+      <div class="audience-not">
+        <h3>❌ 不适合你，如果你……</h3>
+        <ul>
+          <li>想要"明天必涨"的代码推荐</li>
+          <li>希望 AI 告诉你什么时候买、什么时候卖</li>
+          <li>需要深度个股研报和估值分析</li>
+          <li>追求"稳赚不赔"的投资策略</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Pricing
+     ============================================================ -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-label">定价</div>
+    <h2 class="section-title">一杯咖啡的价格，省下整月的盯盘时间</h2>
+    <p class="section-sub"></p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">免费试用</div>
+        <div class="pricing-price">¥0<span>/7天</span></div>
+        <div class="pricing-desc">无需付费，体验完整服务</div>
+        <ul class="pricing-features">
+          <li>每日收盘数据推送</li>
+          <li>大盘指数 + 成交量</li>
+          <li>飞书/微信群推送</li>
+          <li>7 天后自动到期</li>
+        </ul>
+        <a href="#signup" class="btn-outline" style="display:block; text-align:center;">开始试用</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-name">年度订阅</div>
+        <div class="pricing-price">¥168<span>/年</span></div>
+        <div class="pricing-desc">日均不到 5 毛钱</div>
+        <ul class="pricing-features">
+          <li>每日收盘数据推送</li>
+          <li>大盘指数 + 成交量 + 板块资金</li>
+          <li>财经日历提醒</li>
+          <li>飞书/微信双渠道</li>
+          <li>优先客服支持</li>
+        </ul>
+        <a href="#signup" class="btn-primary" style="display:block; text-align:center;">立即订阅</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Compliance
+     ============================================================ -->
+<section class="section section-gray">
+  <div class="container">
+    <div class="compliance-banner">
+      <h3>⚖️ 重要声明</h3>
+      <ul>
+        <li><strong>本服务是纯数据工具</strong>，仅推送客观市场数据（指数、成交量、资金流向），不包含任何投资分析、预测、评分或买卖建议。</li>
+        <li><strong>我们不是投资顾问</strong>，不具备证券投资咨询资质，不提供任何形式的投资建议。</li>
+        <li><strong>数据仅供参考</strong>，过往市场表现不代表未来收益。投资有风险，入市需谨慎。</li>
+        <li><strong>数据来源标注</strong>：所有数据来自 AkShare / 东方财富等公开数据接口。</li>
+        <li>如您需要投资建议，请咨询持牌专业机构。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Signup — 零后端依赖：填写信息后展示微信联系方式
+     ============================================================ -->
+<section class="section" id="signup">
+  <div class="container">
+    <div class="section-label">限时免费试用</div>
+    <h2 class="section-title">扫码加微信，7 天免费体验</h2>
+    <p class="section-sub">不需要注册任何账号。加微信，我们帮你配置好，3 分钟搞定。</p>
+
+    <!-- Step 1: 表单 -->
+    <div class="signup-card" id="signup-card">
+      <p style="text-align:center; color:var(--gray-500); font-size:.88rem; margin-bottom:20px;">
+        填一下基本信息，方便我们提前帮你准备好推送配置 👇
+      </p>
+      <form id="signup-form" action="javascript:void(0)">
+        <div class="form-group">
+          <label for="name">称呼 *</label>
+          <input type="text" id="name" name="name" placeholder="怎么称呼你？" required>
+        </div>
+        <div class="form-group">
+          <label for="contact">手机号 / 微信号 *</label>
+          <input type="text" id="contact" name="contact" placeholder="你的微信号或手机号" required>
+        </div>
+        <div class="form-group">
+          <label for="channel">希望推送渠道</label>
+          <select id="channel" name="channel">
+            <option value="feishu">飞书</option>
+            <option value="wechat">企业微信 / 微信群</option>
+            <option value="both">两个都要</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="note">备注（选填）</label>
+          <input type="text" id="note" name="note" placeholder="关注哪些板块？有什么特别需求？">
+        </div>
+        <button type="submit" class="form-submit">📋 提交信息，查看微信号</button>
+        <p class="form-note">提交后显示微信联系方式，直接添加即可。信息仅用于开通服务。</p>
+      </form>
+    </div>
+
+    <!-- Step 2: 提交后展示微信 -->
+    <div class="signup-card" id="form-success" style="display:none;">
+      <div style="text-align:center;">
+        <h4 style="color:var(--green-dark); font-size:1.15rem; margin-bottom:6px;">✅ 信息已确认</h4>
+        <p style="font-size:.9rem; color:var(--gray-500); margin-bottom:24px;">
+          请截图或复制下方信息，添加微信
+        </p>
+
+        <!-- 微信二维码 -->
+        <img src="wechat-qr.png" alt="微信二维码" style="width:180px; height:180px; margin:0 auto 16px; border-radius:12px; display:block; object-fit:contain; border:1px solid var(--gray-200);">
+
+        <!-- 微信号（一键复制） -->
+        <div style="background:var(--green-bg); border:1px solid #a7f3d0; border-radius:10px; padding:16px; margin-bottom:12px;">
+          <p style="font-size:.82rem; color:var(--gray-500); margin-bottom:6px;">👇 复制微信号，打开微信添加</p>
+          <p style="font-size:1.2rem; font-weight:800; color:var(--green-dark); letter-spacing:.02em;" id="wechat-id-display">YrenZ_Wcc0512</p>
+          <button onclick="copyWechat()" style="margin-top:10px; padding:8px 20px; background:var(--green); color:white; border:none; border-radius:6px; font-size:.85rem; font-weight:600; cursor:pointer;">📋 一键复制微信号</button>
+          <p style="font-size:.75rem; color:var(--gray-400); margin-top:6px; display:none;" id="copy-feedback">✅ 已复制！打开微信粘贴添加</p>
+        </div>
+
+        <p style="font-size:.8rem; color:var(--gray-400);">
+          加微信时请备注「<strong>数据推送</strong>」，我们会尽快通过
+        </p>
+      </div>
+    </div>
+
+    <!-- 文案兜底：也可以不填表直接加 -->
+    <div style="text-align:center; margin-top:20px; padding:16px; max-width:480px; margin-left:auto; margin-right:auto;">
+      <p style="font-size:.82rem; color:var(--gray-400);">
+        不想填表？直接加 <strong style="color:var(--gray-600);">YrenZ_Wcc0512</strong>，备注「数据推送」
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Footer
+     ============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer-strong">📊 盯盘数据助手 — 纯数据工具，非投资顾问</p>
+    <p style="margin-top:8px;">
+      数据来源：AkShare / 东方财富 |
+      本服务不提供任何投资分析、预测或建议<br>
+      © 2026 盯盘数据助手
+    </p>
+  </div>
+</footer>
+
+<!-- ============================================================
+     Scripts
+     ============================================================ -->
+<script>
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Signup form — 零后端：填写后展示微信联系方式
+var form = document.getElementById('signup-form');
+var card = document.getElementById('signup-card');
+var success = document.getElementById('form-success');
+
+form.addEventListener('submit', function() {
+  // 检查必填字段
+  var nameEl = document.getElementById('name');
+  var contactEl = document.getElementById('contact');
+  if (!nameEl.value.trim() || !contactEl.value.trim()) {
+    return; // 让浏览器原生 required 提示生效
+  }
+  // 隐藏表单，展示微信信息
+  card.style.display = 'none';
+  success.style.display = 'block';
+  success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+// 一键复制微信号
+function copyWechat() {
+  var el = document.getElementById('wechat-id-display');
+  var fb = document.getElementById('copy-feedback');
+  var text = el.textContent;
+
+  // 优先使用 Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      fb.style.display = 'block';
+      setTimeout(function() { fb.style.display = 'none'; }, 3000);
+    });
+  } else {
+    // 降级方案：创建临时 textarea
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      fb.style.display = 'block';
+      setTimeout(function() { fb.style.display = 'none'; }, 3000);
+    } catch (err) {
+      alert('复制失败，请手动复制微信号：' + text);
+    }
+    document.body.removeChild(ta);
+  }
+}
+</script>
+
+</body>
+</html>
